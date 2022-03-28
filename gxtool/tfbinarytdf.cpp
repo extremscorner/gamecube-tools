@@ -219,7 +219,7 @@ int CTFBinaryTDF::WriteTexture_CI4(_tImage *tImage)
 	int xres,yres;
 	_tLayer *tLayers;
 	CImage *pImg;
-	unsigned char *pPix;
+	BYTE *bits;
 	unsigned char ria,ucTmp;
 
 	if(!tImage) return 0;
@@ -228,16 +228,15 @@ int CTFBinaryTDF::WriteTexture_CI4(_tImage *tImage)
 	tLayers = tImage->GetLayers();
 	while(tLayers)  {
 		pImg = tLayers->GetImage();
-		pImg->GetPalettized(&pPix,NULL,16);
-		
 		xres = pImg->GetXSize();
 		yres = pImg->GetYSize();
 
+		bits = pImg->GetPixelPalettized();
 		for(y=0;y<yres;y+=8) {
 			for(x=0;x<xres;x+=8) {
 				for(iy=0;iy<8;++iy) {
 					for(ix=0;ix<8;++ix) {
-						ria = pPix[((y+iy)*xres+(x+ix))];
+						ria = bits[((y+iy)*xres+(x+ix))];
 						
 						if(!(ix%2)) ucTmp = _SHIFTL(ria,4,4);
 						else {
@@ -248,8 +247,6 @@ int CTFBinaryTDF::WriteTexture_CI4(_tImage *tImage)
 				}
 			}
 		}
-		delete [] pPix;
-
 		tLayers = tLayers->next_p;
 	}
 	return nRet;
@@ -262,7 +259,7 @@ int CTFBinaryTDF::WriteTexture_CI8(_tImage *tImage)
 	int xres,yres;
 	_tLayer *tLayers;
 	CImage *pImg;
-	unsigned char *pPix;
+	BYTE *bits;
 	unsigned char ria;
 
 	if(!tImage) return 0;
@@ -271,23 +268,20 @@ int CTFBinaryTDF::WriteTexture_CI8(_tImage *tImage)
 	tLayers = tImage->GetLayers();
 	while(tLayers)  {
 		pImg = tLayers->GetImage();
-		pImg->GetPalettized(&pPix,NULL,256);
-
 		xres = pImg->GetXSize();
 		yres = pImg->GetYSize();
 
+		bits = pImg->GetPixelPalettized();
 		for(y=0;y<yres;y+=4) {
 			for(x=0;x<xres;x+=8) {
 				for(iy=0;iy<4;++iy) {
 					for(ix=0;ix<8;++ix) {
-						ria = pPix[((y+iy)*xres+(x+ix))];
+						ria = bits[((y+iy)*xres+(x+ix))];
 						nRet += WriteValue(&ria,VALUE_TYPE_CHAR);
 					}
 				}
 			}
 		}
-		delete [] pPix;
-
 		tLayers = tLayers->next_p;
 	}
 	return nRet;
@@ -490,9 +484,9 @@ int CTFBinaryTDF::WritePalDescBlock()
 	nRet = 0;
 	tImages = m_tImages;
 	while(tImages) {
-		Seek(tImages->nPalDescOffset,SEEK_SET);
-
 		if(tImages->nPalCols>0) {
+			Seek(tImages->nPalDescOffset,SEEK_SET);
+
 			sTmp = (short)tImages->nPalCols;
 			nRet += WriteValue(&sTmp,VALUE_TYPE_SHORT);
 
@@ -522,12 +516,16 @@ int CTFBinaryTDF::WritePalDataBlock()
 	nRet = 0;
 	tImages = m_tImages;
 	while(tImages) {
-		Seek(tImages->nPalDataOffset,SEEK_SET);
-
 		if(tImages->pPal && tImages->nPalCols>0) {
 			pPal = tImages->pPal;
 			nEntries = tImages->nPalCols;
+
+			Seek(tImages->nPalDataOffset,SEEK_SET);
+
 			switch(tImages->nPalFmt) {
+				case TF_TLUT_IA8:
+					nRet += WritePalBlock_IA8(nEntries,pPal);
+					break;
 				case TF_TLUT_RGB565:
 					nRet += WritePalBlock_RGB565(nEntries,pPal);
 					break;
@@ -650,6 +648,29 @@ int CTFBinaryTDF::WriteImageDataBlock()
 		}
 		tImages = tImages->pNext;
 	}
+	return nRet;
+}
+
+int CTFBinaryTDF::WritePalBlock_IA8(int nEntries,RGBQUAD *pPal)
+{
+	int i,nPad,nRet = 0;
+	unsigned short color;
+	unsigned char ria,a;
+
+	if(!pPal) return 0;
+
+	nPad = 0;
+	if(nEntries<16) nPad = 16-nEntries;
+	else if(nEntries%16) nPad = 16-(nEntries%16);
+
+	for(i=0;i<nEntries;i++) {
+		a = pPal[i].rgbReserved;
+		ria = (pPal[i].rgbRed+pPal[i].rgbGreen+pPal[i].rgbBlue)/3;
+		color = _SHIFTL(a,8,8)|(ria&0xff);
+		nRet += WriteValue(&color,VALUE_TYPE_SHORT);
+	}
+	if(nPad>0) nRet += WriteValue(tplPad,VALUE_TYPE_DATA,nPad*sizeof(short));
+
 	return nRet;
 }
 

@@ -283,7 +283,7 @@ int CTextureFile::ComputeTPLImageBufferSize_8Bit(CConverter::_tLayer *tLayer)
 		nHeight = pImg->GetYSize();
 	}
 	nCols = ((nWidth + 7) >> 3);
-	nRows = ((nHeight + 7) >> 2);
+	nRows = ((nHeight + 3) >> 2);
 
 	return (nCols*nRows*32);
 }
@@ -434,10 +434,10 @@ void CTextureFile::SetTPLTextureValues()
 
 void CTextureFile::SetTPLPaletteValues()
 {
-	int nColFmt;
+	int nPos;
+	int nBankOffset;
 	int nPalDescOffset;
-	int nPos,nEntrySize;
-	int nBankOffset,nCols;
+	int nColFmt,nCols;
 	CImage *pImg;
 	RGBQUAD *pPal;
 	_tImage *tImages;
@@ -456,44 +456,36 @@ void CTextureFile::SetTPLPaletteValues()
 			{
 				tImages->nPalDataOffset = nBankOffset;
 				tImages->nPalDescOffset = nPalDescOffset+(nPos*tplPalDescSize);
-				switch(tImages->nPalFmt) {
-					case TF_TLUT_RGB565:
-					case TF_TLUT_RGB5A3:
-						nEntrySize = 2;
-						break;
-					default:
-						return;
-						break;
-				}
 
 				nCols = 0;
 				pPal = NULL;
 				if(tImages->pImage) {
 					pImg = tImages->pImage;
 					if(nColFmt==TF_CI4)
-						nCols = pImg->GetPalettized(NULL,&pPal,16);
+						nCols = pImg->GetPalette(&pPal,16);
 					else 
-						nCols = pImg->GetPalettized(NULL,&pPal,256);
+						nCols = pImg->GetPalette(&pPal,256);
 
 					if(pPal && nCols>0 && nCols<=16384) {
 						tImages->nPalCols = nCols;
 						tImages->pPal = pPal;
 
-						tImages->nPalDataLen = ((nCols+15)&0xfff0)*nEntrySize;
+						tImages->nPalDataLen = ((nCols+15)&~15)*sizeof(short);
 					}
 				}
+
+				nBankOffset += tImages->nPalDataLen;
+				m_nPalBankSize += tImages->nPalDataLen;
+
+				nPos++;
 			}
 			break;
 
 			default:
 				break;
 		}
-		
-		nBankOffset += tImages->nPalDataLen;
-		m_nPalBankSize += tImages->nPalDataLen;
 
 		tImages = tImages->pNext;
-		nPos++;
 	}
 }
 

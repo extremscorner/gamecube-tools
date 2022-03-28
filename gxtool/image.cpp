@@ -13,6 +13,7 @@ CImage::CImage()
 	m_nXSize = 0;
 	m_nYSize = 0;
 	m_pImage = NULL;
+	m_pImagePalettized = NULL;
 }
 
 CImage::CImage(const CImage &rImage)
@@ -20,6 +21,7 @@ CImage::CImage(const CImage &rImage)
 	m_nXSize = 0;
 	m_nYSize = 0;
 	m_pImage = FreeImage_Clone(rImage.GetImage());
+	m_pImagePalettized = FreeImage_Clone(rImage.GetImagePalettized());
 
 	if(m_pImage) {
 		m_nXSize = FreeImage_GetWidth(m_pImage);
@@ -27,11 +29,12 @@ CImage::CImage(const CImage &rImage)
 	}
 }
 
-CImage::CImage(FIBITMAP *pImage)
+CImage::CImage(FIBITMAP *pImage,FIBITMAP *pImagePalettized)
 {
 	m_nXSize = 0;
 	m_nYSize = 0;
 	m_pImage = FreeImage_Clone(pImage);
+	m_pImagePalettized = FreeImage_Clone(pImagePalettized);
 
 	if(m_pImage) {
 		m_nXSize = FreeImage_GetWidth(m_pImage);
@@ -41,9 +44,11 @@ CImage::CImage(FIBITMAP *pImage)
 
 CImage::~CImage()
 {
-	if(m_pImage!=NULL) FreeImage_Unload(m_pImage);
+	FreeImage_Unload(m_pImage);
+	FreeImage_Unload(m_pImagePalettized);
 
 	m_pImage = NULL;
+	m_pImagePalettized = NULL;
 	m_nXSize = 0;
 	m_nYSize = 0;
 }
@@ -63,6 +68,8 @@ int CImage::Load(const char *pszFilename)
 
 	if(img) {
 		bpp = FreeImage_GetBPP(img);
+		if(bpp<=8)
+			m_pImagePalettized = FreeImage_ConvertTo8Bits(img);
 		if(bpp!=32) {
 			FIBITMAP *tmp = FreeImage_ConvertTo32Bits(img);
 
@@ -71,8 +78,6 @@ int CImage::Load(const char *pszFilename)
 			
 			img = tmp;
 		}
-		
-		FreeImage_FlipVertical(img);
 
 		nWidth = m_nXSize = FreeImage_GetWidth(img);
 		nHeight = m_nYSize = FreeImage_GetHeight(img);
@@ -93,6 +98,9 @@ int CImage::Load(const char *pszFilename)
 		m_nXSize = nWidth;
 		m_nYSize = nHeight;
 
+		FreeImage_FlipVertical(m_pImage);
+		FreeImage_FlipVertical(m_pImagePalettized);
+
 		return 1;
 	}
 	return 0;
@@ -109,7 +117,7 @@ CImage* CImage::BoxFilter(int nDestWidth,int nDestHeight)
 			FreeImage_Unload(fib);
 		}
 	} else
-		pImage = new CImage(m_pImage);
+		pImage = new CImage(m_pImage,m_pImagePalettized);
 
 	return pImage;
 }
@@ -121,8 +129,10 @@ void CImage::Resize(int nDestWidth,int nDestHeight)
 	fib = FreeImage_Rescale(m_pImage,nDestWidth,nDestHeight,FILTER_BILINEAR);
 	if(fib!=NULL) {
 		FreeImage_Unload(m_pImage);
+		FreeImage_Unload(m_pImagePalettized);
 
 		m_pImage = fib;
+		m_pImagePalettized = NULL;
 		m_nXSize = FreeImage_GetWidth(m_pImage);
 		m_nYSize = FreeImage_GetHeight(m_pImage);
 	}
@@ -132,6 +142,14 @@ BYTE* CImage::GetPixel()
 {
 	if(m_pImage!=NULL)
 		return FreeImage_GetBits(m_pImage);
+	else
+		return NULL;
+}
+
+BYTE* CImage::GetPixelPalettized()
+{
+	if(m_pImagePalettized!=NULL)
+		return FreeImage_GetBits(m_pImagePalettized);
 	else
 		return NULL;
 }
@@ -313,48 +331,39 @@ bool CImage::IsTransparent()
 		false;
 }
 
-int CImage::GetPalettized(unsigned char **ppRcvIndices,RGBQUAD **ppRcvColors,int nReqColors)
+int CImage::GetPalette(RGBQUAD **ppRcvColors,int nReqColors)
 {
-	int nSize;
-	int nNumCols = 0;
-	BYTE *bits;
+	int i,nNumCols,nNumTrns;
 	RGBQUAD *pPal;
-	FIBITMAP *tmp = NULL;
-	FIBITMAP *fib = NULL;
+	BYTE *pTrns;
 
 	if(m_pImage==NULL) return 0;
 
 	// we only support 4/8 bit color indexed images
 	// convert down to 24 bits and quantize to desired color count
-	tmp = FreeImage_ConvertTo24Bits(m_pImage);
-	if(tmp) {
-		if(nReqColors==16)
-			fib = FreeImage_ColorQuantizeEx(tmp,FIQ_NNQUANT,16);
-		else if(nReqColors==256)
-			fib = FreeImage_ColorQuantizeEx(tmp,FIQ_NNQUANT,256);
-		else {
-			FreeImage_Unload(tmp);
-			return 0;
-		}
-		FreeImage_Unload(tmp);
+	if(m_pImagePalettized==NULL) {
+		m_pImagePalettized = FreeImage_ColorQuantizeEx(m_pImage,FIQ_LFPQUANT,nReqColors);
+		if(m_pImagePalettized==NULL)
+			m_pImagePalettized = FreeImage_ColorQuantizeEx(m_pImage,FIQ_WUQUANT,nReqColors);
 	}
 
-	if(fib) {
-		nSize = FreeImage_GetPitch(fib)*FreeImage_GetHeight(fib);
-		bits = FreeImage_GetBits(fib);
-		pPal = FreeImage_GetPalette(fib);
-		nNumCols = FreeImage_GetColorsUsed(fib);
-		if(ppRcvIndices!=NULL) {
-			*ppRcvIndices = new unsigned char[nSize];
-			memcpy(*ppRcvIndices,bits,nSize);
-		}
+	if(m_pImagePalettized!=NULL) {
+		pPal = FreeImage_GetPalette(m_pImagePalettized);
+		nNumCols = FreeImage_GetColorsUsed(m_pImagePalettized);
+		pTrns = FreeImage_GetTransparencyTable(m_pImagePalettized);
+		nNumTrns = FreeImage_GetTransparencyCount(m_pImagePalettized);
 		if(ppRcvColors!=NULL) {
 			*ppRcvColors = new RGBQUAD[nNumCols];
-			memcpy(*ppRcvColors,pPal,sizeof(RGBQUAD)*nNumCols);
+			for(i=0;i<nNumCols;i++) {
+				(*ppRcvColors)[i].rgbRed = pPal[i].rgbRed;
+				(*ppRcvColors)[i].rgbGreen = pPal[i].rgbGreen;
+				(*ppRcvColors)[i].rgbBlue = pPal[i].rgbBlue;
+				(*ppRcvColors)[i].rgbReserved = (i<nNumTrns)?pTrns[i]:0xff;
+			}
 		}
-		FreeImage_Unload(fib);
+		return nNumCols;
 	}
-	return nNumCols;
+	return 0;
 }
 
 

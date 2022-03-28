@@ -30,6 +30,7 @@ private:
 	int WriteTexture_RGBA8(_tImage *tImage);
 	int WriteTexture_CMPR(_tImage *tImage);
 
+	int WritePalBlock_IA8(int nEntries,RGBQUAD *pPal);
 	int WritePalBlock_RGB565(int nEntries,RGBQUAD *pPal);
 	int WritePalBlock_RGB5A3(int nEntries,RGBQUAD *pPal);
 };

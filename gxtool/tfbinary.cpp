@@ -249,10 +249,11 @@ int CTFBinary::WriteTexture_IA8(_tImage *tImage)
 int CTFBinary::WriteTexture_CI4(_tImage *tImage)
 {
 	int x,y,ix,iy;
-	int xres,yres,cols;
+	int xres,yres;
 	_tLayer *tLayers;
 	CImage *pImg;
-	unsigned char uctmp,ria,*pPix;
+	BYTE *bits;
+	unsigned char uctmp,ria;
 	string sFilename;
 	FILE *pFile = NULL;
 
@@ -270,13 +271,13 @@ int CTFBinary::WriteTexture_CI4(_tImage *tImage)
 		pImg = tLayers->GetImage();
 		xres = pImg->GetXSize();
 		yres = pImg->GetYSize();
-		cols = pImg->GetPalettized(&pPix,NULL,16);
 
+		bits = pImg->GetPixelPalettized();
 		for(y=0;y<yres;y+=8) {
 			for(x=0;x<xres;x+=8) {
 				for(iy=0;iy<8;++iy) {
 					for(ix=0;ix<8;++ix) {
-						ria = pPix[((y+iy)*xres+(x+ix))];
+						ria = bits[((y+iy)*xres+(x+ix))];
 						
 						if(!(ix%2)) uctmp = _SHIFTL(ria,4,4);
 						else {
@@ -287,7 +288,6 @@ int CTFBinary::WriteTexture_CI4(_tImage *tImage)
 				}
 			}
 		}
-		delete [] pPix;
 		tLayers = tLayers->next_p;
 	}
 	fclose(pFile);
@@ -297,10 +297,11 @@ int CTFBinary::WriteTexture_CI4(_tImage *tImage)
 int CTFBinary::WriteTexture_CI8(_tImage *tImage)
 {
 	int x,y,ix,iy;
-	int xres,yres,cols;
+	int xres,yres;
 	_tLayer *tLayers;
 	CImage *pImg;
-	unsigned char *pPix,ria;
+	BYTE *bits;
+	unsigned char ria;
 	string sFilename;
 	FILE *pFile = NULL;
 
@@ -318,19 +319,18 @@ int CTFBinary::WriteTexture_CI8(_tImage *tImage)
 		pImg = tLayers->GetImage();
 		xres = pImg->GetXSize();
 		yres = pImg->GetYSize();
-		cols = pImg->GetPalettized(&pPix,NULL,256);
 
+		bits = pImg->GetPixelPalettized();
 		for(y=0;y<yres;y+=4) {
 			for(x=0;x<xres;x+=8) {
 				for(iy=0;iy<4;++iy) {
 					for(ix=0;ix<8;++ix) {
-						ria = pPix[((y+iy)*xres+(x+ix))];
+						ria = bits[((y+iy)*xres+(x+ix))];
 						WriteValue(&ria,VALUE_TYPE_CHAR,1,pFile);
 					}
 				}
 			}
 		}
-		delete [] pPix;
 		tLayers = tLayers->next_p;
 	}
 	fclose(pFile);
@@ -567,7 +567,7 @@ int CTFBinary::WritePaletteBlock(_tImage *tImage,int nReqCols)
 		default:
 			break;
 	}
-	tImage->nPalCols = pImg->GetPalettized(NULL,&tImage->pPal,nReqCols);
+	tImage->nPalCols = pImg->GetPalette(&tImage->pPal,nReqCols);
 
 	WritePalHeader(tImage);
 
