@@ -267,6 +267,7 @@ int CConverter::GenerateTexture(CParser::_ttokenstringlist *pEntry)
 	int nRet,nMaxLOD;
 	int nMinLOD,nRemapLOD;
 	int nColFmt,nSizeX,nSizeY;
+	int nWrapS,nWrapT;
 	CImage *pImg;
 	_tImage *pImage;
 
@@ -301,6 +302,10 @@ int CConverter::GenerateTexture(CParser::_ttokenstringlist *pEntry)
 			
 		}
 
+		nWrapS = atoi(pEntry->GetTokenValue("wraps","-1"));
+		nWrapT = atoi(pEntry->GetTokenValue("wrapt","-1"));
+		pImage->SetWrapST(nWrapS,nWrapT);
+
 		if(strcasecmp(pEntry->GetTokenValue("mipmap","no"),"yes")==0) {
 			nMinLOD = atoi(pEntry->GetTokenValue("minlod","0"));
 			nMaxLOD = atoi(pEntry->GetTokenValue("maxlod","0"));
@@ -319,6 +324,7 @@ int CConverter::GenerateTextures()
 	int nRet,nMaxLOD;
 	int nMinLOD,nRemapLOD;
 	int nColFmt,nSizeX,nSizeY;
+	int nWrapS,nWrapT;
 	CImage *pImg;
 	_tImage *pImage;
 	const CParser::_ttokenstringlist *pList;
@@ -355,6 +361,10 @@ int CConverter::GenerateTextures()
 					break;
 				
 			}
+
+			nWrapS = atoi(pList->GetTokenValue("wraps","-1"));
+			nWrapT = atoi(pList->GetTokenValue("wrapt","-1"));
+			pImage->SetWrapST(nWrapS,nWrapT);
 
 			if(strcasecmp(pList->GetTokenValue("mipmap","no"),"yes")==0) {
 				nMinLOD = atoi(pList->GetTokenValue("minlod","0"));
