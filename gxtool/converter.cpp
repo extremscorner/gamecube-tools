@@ -66,6 +66,8 @@ CConverter::_tImage::_tImage()
 	nRemapLOD = 0;
 	nWrapT = -1;
 	nWrapS = -1;
+	nMin = -1;
+	nMag = -1;
 	nColFmt = -1;
 	nPalFmt = -1;
 	nImageDataLen = 0;
@@ -91,6 +93,8 @@ CConverter::_tImage::~_tImage()
 	nRemapLOD = 0;
 	nWrapT = -1;
 	nWrapS = -1;
+	nMin = -1;
+	nMag = -1;
 	nColFmt = -1;
 	nPalFmt = -1;
 	nImageDataLen = 0;
@@ -99,6 +103,7 @@ CConverter::_tImage::~_tImage()
 	nPalDescOffset = 0;
 	nPalDataOffset = 0;
 	nPalDataLen = 0;
+	nPalCols = 0;
 	pszID = NULL;
 	pLayers = NULL;
 	pImage = NULL;
@@ -268,6 +273,7 @@ int CConverter::GenerateTexture(CParser::_ttokenstringlist *pEntry)
 	int nMinLOD,nRemapLOD;
 	int nColFmt,nSizeX,nSizeY;
 	int nWrapS,nWrapT;
+	int nMin,nMag;
 	CImage *pImg;
 	_tImage *pImage;
 
@@ -306,6 +312,10 @@ int CConverter::GenerateTexture(CParser::_ttokenstringlist *pEntry)
 		nWrapT = atoi(pEntry->GetTokenValue("wrapt","-1"));
 		pImage->SetWrapST(nWrapS,nWrapT);
 
+		nMin = atoi(pEntry->GetTokenValue("minfilt","-1"));
+		nMag = atoi(pEntry->GetTokenValue("magfilt","-1"));
+		pImage->SetMinMag(nMin,nMag);
+
 		if(strcasecmp(pEntry->GetTokenValue("mipmap","no"),"yes")==0) {
 			nMinLOD = atoi(pEntry->GetTokenValue("minlod","0"));
 			nMaxLOD = atoi(pEntry->GetTokenValue("maxlod","0"));
@@ -325,6 +335,7 @@ int CConverter::GenerateTextures()
 	int nMinLOD,nRemapLOD;
 	int nColFmt,nSizeX,nSizeY;
 	int nWrapS,nWrapT;
+	int nMin,nMag;
 	CImage *pImg;
 	_tImage *pImage;
 	const CParser::_ttokenstringlist *pList;
@@ -365,6 +376,10 @@ int CConverter::GenerateTextures()
 			nWrapS = atoi(pList->GetTokenValue("wraps","-1"));
 			nWrapT = atoi(pList->GetTokenValue("wrapt","-1"));
 			pImage->SetWrapST(nWrapS,nWrapT);
+
+			nMin = atoi(pList->GetTokenValue("minfilt","-1"));
+			nMag = atoi(pList->GetTokenValue("magfilt","-1"));
+			pImage->SetMinMag(nMin,nMag);
 
 			if(strcasecmp(pList->GetTokenValue("mipmap","no"),"yes")==0) {
 				nMinLOD = atoi(pList->GetTokenValue("minlod","0"));

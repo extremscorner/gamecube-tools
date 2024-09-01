@@ -568,11 +568,11 @@ int CTFBinaryTDF::WriteImageDescBlock()
 		nRet += WriteValue(&iTmp,VALUE_TYPE_INT);
 
 		iTmp = tImages->nWrapS;
-		if(iTmp==-1) iTmp = ComputeFilterModeByDimension(tImages);
+		if(iTmp==-1) iTmp = ComputeWrapModeByDimension(tImages);
 		nRet += WriteValue(&iTmp,VALUE_TYPE_INT);
 
 		iTmp = tImages->nWrapT;
-		if(iTmp==-1) iTmp = ComputeFilterModeByDimension(tImages);
+		if(iTmp==-1) iTmp = ComputeWrapModeByDimension(tImages);
 		nRet += WriteValue(&iTmp,VALUE_TYPE_INT);
 
 		GetMinMag(tImages,nMin,nMag);

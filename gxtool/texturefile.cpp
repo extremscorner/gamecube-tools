@@ -57,16 +57,21 @@ CTextureFile::~CTextureFile()
 
 void CTextureFile::GetMinMag(CConverter::_tImage *tImage,int& nMin,int& nMag)
 {
-	nMin = 0;
-	nMag = 0;
+	nMin = TF_FILTER_NEAR;
+	nMag = TF_FILTER_NEAR;
 
 	if(!tImage) return;
 
 	switch(tImage->nColFmt) {
 		case TF_CI4:
 		case TF_CI8:
-			nMin = TF_FILTER_LINEAR;
-			nMag = TF_FILTER_LINEAR;
+			if((tImage->nMaxLOD-tImage->nMinLOD+1)==1) {
+				nMin = TF_FILTER_LINEAR;
+				nMag = TF_FILTER_LINEAR;
+			} else {
+				nMin = TF_FILTER_LIN_MIP_NEAR;
+				nMag = TF_FILTER_LINEAR;
+			}
 			break;
 		default:
 			if((tImage->nMaxLOD-tImage->nMinLOD+1)==1) {
@@ -78,6 +83,9 @@ void CTextureFile::GetMinMag(CConverter::_tImage *tImage,int& nMin,int& nMag)
 			}
 			break;
 	}
+
+	if(tImage->nMin!=-1) nMin = tImage->nMin;
+	if(tImage->nMag!=-1) nMag = tImage->nMag;
 }
 
 int CTextureFile::Seek(int offset,int origin,FILE *pFile)
@@ -345,13 +353,13 @@ int CTextureFile::ComputeTPLImageBufferSize_Cmpr(CConverter::_tLayer *tLayer)
 	return (nCols*nRows*32);
 }
 
-int CTextureFile::ComputeFilterModeByDimension(CConverter::_tImage *tImage)
+int CTextureFile::ComputeWrapModeByDimension(CConverter::_tImage *tImage)
 {
 	int i;
 	int xres,yres;
 	int *p_dim;
 
-	if(!tImage) return 0;
+	if(!tImage) return TF_WRAP_CLAMP;
 	if(tImage->nWrapS==-1 && tImage->nWrapT==-1) {
 		xres = tImage->pImage->GetXSize();
 		yres = tImage->pImage->GetYSize();

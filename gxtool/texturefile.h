@@ -39,7 +39,7 @@ protected:
 	void SetTPLTextureValues();
 	void SetTPLPaletteValues();
 
-	int ComputeFilterModeByDimension(_tImage *tImage);
+	int ComputeWrapModeByDimension(_tImage *tImage);
 	int ComputeTPLMipMapImageBufferSize(_tImage *tImage);
 	int ComputeTPLImageBufferSize(_tLayer *tLayer);
 

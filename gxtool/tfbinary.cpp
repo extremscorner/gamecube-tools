@@ -628,8 +628,8 @@ int CTFBinary::WriteTexHeader(_tImage *tImage)
 
 	nWrapS = tImage->nWrapS;
 	nWrapT = tImage->nWrapT;
-	if(nWrapS==-1) nWrapS = ComputeFilterModeByDimension(tImage);
-	if(nWrapT==-1) nWrapT = ComputeFilterModeByDimension(tImage);
+	if(nWrapS==-1) nWrapS = ComputeWrapModeByDimension(tImage);
+	if(nWrapT==-1) nWrapT = ComputeWrapModeByDimension(tImage);
 
 	sID = tImage->pszID;
 	sFilename = sID + "tex.h";

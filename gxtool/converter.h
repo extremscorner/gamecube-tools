@@ -90,9 +90,16 @@ public:
 			nWrapT = wrapT;
 		}
 
+		void SetMinMag(int min,int mag)
+		{
+			nMin = min;
+			nMag = mag;
+		}
+
 		int nMinLOD,nMaxLOD;
 		int nRemapLOD,nColFmt;
 		int nWrapS,nWrapT;
+		int nMin,nMag;
 		int nPalCols;
 		int nPalFmt;
 		int nPalDescOffset;
