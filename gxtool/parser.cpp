@@ -106,8 +106,9 @@ int CParser::Parse(int argc,const char **argv)
 	
 	if(m_sInFilename.empty()) return EXIT_FAILURE;
 
-	id = m_sInFilename.substr(0,m_sInFilename.find('.'));
-	if(m_sOutFilename.empty()) m_sOutFilename = id + ".tpl";
+	id = path(m_sInFilename).stem().string();
+	if(m_sOutFilename.empty())
+		m_sOutFilename = path(m_sInFilename).replace_extension(".tpl").string();
 
 	if(useScript==true)
 		LoadScriptfile(m_sInFilename.c_str());
@@ -116,7 +117,7 @@ int CParser::Parse(int argc,const char **argv)
 		string colfmt = " colfmt=6";
 		string mipmap = "",lods = "";
 
-		id = m_sOutFilename.substr(0,m_sOutFilename.find('.'));
+		id = path(m_sOutFilename).stem().string();
 
 		cmdline = "filepath=\"";
 		cmdline += m_sInFilename;
@@ -177,8 +178,7 @@ int CParser::LoadScriptfile(const char *pszFilename)
 		}
 		fclose(pScf);
 		m_sScriptPath = pszFilename;
-		m_sScriptPath.erase(m_sScriptPath.find_last_of("/\\"));
-		m_sScriptPath += "/";		
+		m_sScriptPath.remove_filename();
 		
 	} else
 		nRet = EXIT_FAILURE;

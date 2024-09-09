@@ -38,11 +38,10 @@ int CTFBinaryTDF::Write(CParser *pParser)
 		WriteImageDataBlock();
 		WritePalDataBlock();
 		
-		string headerFilename=pParser->GetOutputFilename();
-		headerFilename.erase(headerFilename.find_last_of("."));
-		headerFilename += ".h";
+		path headerFilename = pParser->GetOutputFilename();
+		headerFilename.replace_extension(".h");
 		
-		FILE *headerFile = fopen(headerFilename.c_str(),"wb");
+		FILE *headerFile = fopen(headerFilename.string().c_str(),"wb");
 		int index=0;
 
 		if(headerFile) {

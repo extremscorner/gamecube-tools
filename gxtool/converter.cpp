@@ -251,10 +251,10 @@ CConverter::_tsImage* CConverter::AddImage(const char *pszImagename,int& nRet)
 	_tsImage *ptr = NULL;
 	CImage *pImg = new CImage();
 	
-	string imagePath = m_pParser->GetScriptPath();
-	imagePath += pszImagename;
+	path imagePath = m_pParser->GetScriptPath();
+	imagePath /= pszImagename;
 
-	nRet = pImg->Load(imagePath.c_str());
+	nRet = pImg->Load(imagePath.string().c_str());
 	if(nRet!=1) return NULL;
 
 	if(pImg) {
@@ -523,14 +523,14 @@ int CConverter::WriteTextures()
 			nRet = pFile->Write(m_pParser);
 			delete pFile;
 		}
-		string depsFilename = m_pParser->GetDepsFilename();
-		if ( !depsFilename.empty()) {
-			FILE *depsFile = fopen(depsFilename.c_str(),"wb");
+		path depsFilename = m_pParser->GetDepsFilename();
+		if (!depsFilename.empty()) {
+			FILE *depsFile = fopen(depsFilename.string().c_str(),"wb");
 			if (depsFile) {
 				fprintf(depsFile,"%s: ", m_pParser->GetOutputFilename());
 				fprintf(depsFile,"\\\n %s ",m_pParser->GetInputFilename());
 				for(unsigned i=0; i<m_Deps.size(); i++) {
-					fprintf(depsFile,"\\\n  %s ",m_Deps[i].c_str());
+					fprintf(depsFile,"\\\n  %s ",m_Deps[i].string().c_str());
 				}
 				fprintf(depsFile,"\n");
 				fclose(depsFile);

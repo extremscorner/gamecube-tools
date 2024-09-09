@@ -1,9 +1,12 @@
 #ifndef __PARSER_H__
 #define __PARSER_H__
 
+#include <filesystem>
+
 class CTokenString;
 
 using namespace std;
+using namespace std::filesystem;
 
 class CParser
 {
@@ -31,8 +34,8 @@ public:
 	const char* GetOutputFilename() {return m_sOutFilename.c_str();}
 	const char* GetInputFilename() {return m_sInFilename.c_str();}
 	const _ttokenstringlist* GetEntries() {return m_pArgList;}
-	string GetScriptPath() { return m_sScriptPath; }
-	string GetDepsFilename() { return m_sDepFilename; }
+	path GetScriptPath() { return m_sScriptPath; }
+	path GetDepsFilename() { return m_sDepFilename; }
 
 protected:
 	void Empty();
@@ -43,8 +46,8 @@ protected:
 protected:
 	string m_sOutFilename;
 	string m_sInFilename;
-	string m_sScriptPath;
-	string m_sDepFilename;
+	path m_sScriptPath;
+	path m_sDepFilename;
 
 	_ttokenstringlist *m_pArgList;
 };

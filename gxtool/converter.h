@@ -144,7 +144,7 @@ private:
 	_tsImage **m_ppSrcImages;
 	_tImage *m_pImages;
 	CParser *m_pParser;
-	std::vector<std::string> m_Deps;
+	std::vector<std::filesystem::path> m_Deps;
 };
 
 #endif
