@@ -208,7 +208,7 @@ int CParser::LoadBuffer(char *pBuffer,int nLen)
 
 			nEnd = nStart;
 			if(pBuffer[nStart]=='<') {
-				while(nEnd<nLen && pBuffer[nEnd-1]!='/' && pBuffer[nEnd]!='>')
+				while(nEnd<nLen && (pBuffer[nEnd-1]!='/' || pBuffer[nEnd]!='>'))
 					nEnd++;
 			} else {
 				while(nEnd<nLen && pBuffer[nEnd]!='\n' && pBuffer[nEnd]!='\r')
