@@ -46,5 +46,5 @@ gcdsptool_LDADD		= libgdopcode.la
 
 elf2dol_SOURCES		= elftool/elf2dol.c
 
-EXTRA_DIST	= autogen.sh doc/GC_DSP.doc doc/GC_DSP.pdf doc/manual.txt doc/opcodes_list.xls \
+EXTRA_DIST	= autogen.sh doc/GC_DSP.pdf doc/GC_DSP.tex doc/manual.txt doc/opcodes_list.xls \
 		  doc/operation.txt doc/reverse.txt doc/reverse_new.txt
