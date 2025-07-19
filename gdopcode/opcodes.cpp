@@ -110,6 +110,7 @@ opc_t opcodes[] =
 	{ "NOP",	0x0000, 0xffff, 1, 0, {}, },
 	{ "DAR",	0x0004, 0xfffc, 1, 1, {{P_REG, 1, 0, 0, 0x0003}}, },
 	{ "IAR",	0x0008, 0xfffc, 1, 1, {{P_REG, 1, 0, 0, 0x0003}}, },
+	{ "SUBARN",	0x000c, 0xfffc, 1, 1, {{P_REG, 1, 0, 0, 0x0003}}, },
 	{ "ADDARN",	0x0010, 0xfff0, 1, 2, {{P_REG, 1, 0, 0, 0x0003}, {P_REG04, 1, 0, 2, 0x000c}}, },
 
 	{ "HALT",	0x0021, 0xffff, 1, 0, {}, },
@@ -166,6 +167,17 @@ opc_t opcodes[] =
 	{ "RETOV",	0x02de, 0xffff, 1, 0, {}, },
 	{ "RET",	0x02df, 0xffff, 1, 0, {}, },
 
+	{ "RTIGE",	0x02f0, 0xffff, 1, 0, {}, },
+	{ "RTILT",	0x02f1, 0xffff, 1, 0, {}, },
+	{ "RTIGT",	0x02f2, 0xffff, 1, 0, {}, },
+	{ "RTILE",	0x02f3, 0xffff, 1, 0, {}, },
+	{ "RTINE",	0x02f4, 0xffff, 1, 0, {}, },
+	{ "RTIEQ",	0x02f5, 0xffff, 1, 0, {}, },
+	{ "RTINC",	0x02f6, 0xffff, 1, 0, {}, },
+	{ "RTIC",	0x02f7, 0xffff, 1, 0, {}, },
+	{ "RTILNZ",	0x02fc, 0xffff, 1, 0, {}, },
+	{ "RTILZ",	0x02fd, 0xffff, 1, 0, {}, },
+	{ "RTIOV",	0x02fe, 0xffff, 1, 0, {}, },
 	{ "RTI",	0x02ff, 0xffff, 1, 0, {}, },
 
 	{ "JRGE",	0x1700, 0xff1f, 1, 1, {{P_REG, 1, 0, 5, 0x00e0}}, },  // new by Hermes
@@ -202,6 +214,9 @@ opc_t opcodes[] =
 	{ "ASL",	0x1480, 0xfec0, 1, 2, {{P_ACC, 1, 0, 8, 0x0100}, {P_IMM, 1, 0, 0, 0x003f}}, },
 	{ "ASR",	0x14c0, 0xfec0, 1, 2, {{P_ACC, 1, 0, 8, 0x0100}, {P_IMM, 1, 0, 0, 0x003f}}, },
 
+	{ "LSRN",	0x02ca, 0xffff, 1, 0, {}, },
+	{ "ASRN",	0x02cb, 0xffff, 1, 0, {}, },
+
 	{ "LRI",	0x0080, 0xffe0, 2, 2, {{P_REG, 1, 0, 0, 0x001f}, {P_IMM, 2, 1, 0, 0xffff}}, },
 	{ "LR",		0x00c0,	0xffe0, 2, 2, {{P_REG, 1, 0, 0, 0x001f}, {P_MEM, 2, 1, 0, 0xffff}}, },
 	{ "SR",		0x00e0,	0xffe0, 2, 2, {{P_MEM, 2, 1, 0, 0xffff}, {P_REG, 1, 0, 0, 0x001f}}, },
@@ -222,15 +237,15 @@ opc_t opcodes[] =
 	{ "ANDF",	0x02a0, 0xfeff, 2, 2, {{P_ACCM, 1, 0, 8, 0x0100}, {P_IMM, 2, 1, 0, 0xffff}}, },
 	{ "ANDCF",	0x02c0, 0xfeff, 2, 2, {{P_ACCM, 1, 0, 8, 0x0100}, {P_IMM, 2, 1, 0, 0xffff}}, }, 
 
-	{ "ILRR",	0x0210, 0xfedc, 1, 2, {{P_ACCM, 1, 0, 8, 0x0100}, {P_PRG, 1, 0, 0, 0x0003}}, },
-	{ "ILRRD",	0x0214, 0xfedc, 1, 2, {{P_ACCM, 1, 0, 8, 0x0100}, {P_PRG, 1, 0, 0, 0x0003}}, },
-	{ "ILRRI",	0x0218, 0xfedc, 1, 2, {{P_ACCM, 1, 0, 8, 0x0100}, {P_PRG, 1, 0, 0, 0x0003}}, },
-	{ "ILRRN",	0x021c, 0xfedc, 1, 2, {{P_ACCM, 1, 0, 8, 0x0100}, {P_PRG, 1, 0, 0, 0x0003}}, },
+	{ "ILRR",	0x0210, 0xfefc, 1, 2, {{P_ACCM, 1, 0, 8, 0x0100}, {P_PRG, 1, 0, 0, 0x0003}}, },
+	{ "ILRRD",	0x0214, 0xfefc, 1, 2, {{P_ACCM, 1, 0, 8, 0x0100}, {P_PRG, 1, 0, 0, 0x0003}}, },
+	{ "ILRRI",	0x0218, 0xfefc, 1, 2, {{P_ACCM, 1, 0, 8, 0x0100}, {P_PRG, 1, 0, 0, 0x0003}}, },
+	{ "ILRRN",	0x021c, 0xfefc, 1, 2, {{P_ACCM, 1, 0, 8, 0x0100}, {P_PRG, 1, 0, 0, 0x0003}}, },
 
 	{ "LOOP",	0x0040,	0xffe0, 1, 1, {{P_REG, 1, 0, 0, 0x001f}}, },
-	{ "BLOOP",	0x0060,	0xffe0, 2, 2, {{P_REG, 1, 0, 0, 0x001f}, {P_VAL, 2, 1, 0, 0xffff}}, },
+	{ "BLOOP",	0x0060,	0xffe0, 2, 2, {{P_REG, 1, 0, 0, 0x001f}, {P_ADDR_I, 2, 1, 0, 0xffff}}, },
 	{ "LOOPI",	0x1000, 0xff00, 1, 1, {{P_IMM, 1, 0, 0, 0x00ff}}, },
-	{ "BLOOPI",	0x1100, 0xff00, 2, 2, {{P_IMM, 1, 0, 0, 0x00ff}, {P_VAL, 2, 1, 0, 0xffff}}, },
+	{ "BLOOPI",	0x1100, 0xff00, 2, 2, {{P_IMM, 1, 0, 0, 0x00ff}, {P_ADDR_I, 2, 1, 0, 0xffff}}, },
 
 	// load and store value pointed by indexing reg and increment; LRR/SRR variants
 	{ "LRR",	0x1800, 0xff80, 1, 2, {{P_REG, 1, 0, 0, 0x001f}, {P_PRG, 1, 0, 5, 0x0060}}, },
@@ -244,11 +259,12 @@ opc_t opcodes[] =
 	{ "SRRN",	0x1b80, 0xff80, 1, 2, {{P_PRG, 1, 0, 5, 0x0060}, {P_REG, 1, 0, 0, 0x001f}}, },
 
 	{ "LRS",	0x2000, 0xf800, 1, 2, {{P_REG18, 1, 0, 8, 0x0700}, {P_MEM, 1, 0, 0, 0x00ff}}, },
-	{ "SRS",	0x2800, 0xf800, 1, 2, {{P_MEM, 1, 0, 0, 0x00ff}, {P_ACCLM, 1, 0, 8, 0x0700}}, }, // for SRS only ACCx.L/.M works here.
+	{ "SRSH",	0x2800, 0xfe00, 1, 2, {{P_MEM, 1, 0, 0, 0x00ff}, {P_ACCH, 1, 0, 8, 0x0100}}, },
+	{ "SRS",	0x2c00, 0xfc00, 1, 2, {{P_MEM, 1, 0, 0, 0x00ff}, {P_ACCLM, 1, 0, 8, 0x0300}}, }, // for SRS only ACCx.L/.M works here.
 																								 // As described in the dolphin DSP sources
 																								 // the final address is calculated by taking the botton 8 bits
 																								 // from the $config register (shifted by 8 to the right) and or'd 
-																								 // with the 8-bit immediat value. Hence those functions are mostly 
+																								 // with the 8-bit immediate value. Hence those functions are mostly 
 																								 // used for operations on device registers like mailboxes etc.
 																								 // Also this explains why we see lri $config,#0x00ff.
 
@@ -276,7 +292,9 @@ opc_t opcodes[] =
 	{ "NX",		0x8000, 0xff00, 1 | P_EXT, 0, {}, },
 	{ "CLR",	0x8100, 0xf700, 1 | P_EXT, 1, {{P_ACC, 1, 0, 11, 0x0800}}, },
 	{ "CMP",	0x8200, 0xff00, 1 | P_EXT, 0, {}, },
+	{ "MULAXH",	0x8300, 0xff00, 1 | P_EXT, 0, {}, },
 	{ "CLRP",	0x8400, 0xff00, 1 | P_EXT, 0, {}, },
+	{ "TSTPROD",0x8500, 0xff00, 1 | P_EXT, 0, {}, },
 	{ "TSTAXH",	0x8600, 0xfe00, 1 | P_EXT, 1, {{P_ACXXH, 1, 0, 8, 0x0100}}, },
 	{ "M2",		0x8a00, 0xff00, 1 | P_EXT, 0, {}, },
 	{ "M0",		0x8b00, 0xff00, 1 | P_EXT, 0, {}, },
@@ -301,7 +319,7 @@ opc_t opcodes[] =
 	{ "ABS",	0xa100, 0xf700, 1 | P_EXT, 1, {{P_ACC, 1, 0,11, 0x0800}}, },
 
 	{ "TST",	0xb100, 0xf700, 1 | P_EXT, 1, {{P_ACC, 1, 0, 11, 0x0800}}, },
-	{ "CMPAXH",	0xc100, 0xe700, 1 | P_EXT, 2, {{P_ACC, 1, 0, 12, 0x1000}, {P_ACXXH, 1, 0, 11, 0x0800}}, },
+	{ "CMPAXH",	0xc100, 0xe700, 1 | P_EXT, 2, {{P_ACC, 1, 0, 11, 0x0800}, {P_ACXXH, 1, 0, 12, 0x1000}}, },
 
 	{ "CLRAL0",	0xFC00, 0xff00, 1 | P_EXT, 0, {}, }, // clear acl0 added by Hermes
 	{ "CLRAL1",	0xFD00, 0xff00, 1 | P_EXT, 0, {}, }, // clear acl1 added by Hermes
@@ -371,10 +389,10 @@ opc_t opcodes_ext[] = // revisar
 	{ "LDAXN",	0x00c7, 0x00cf, 1, 2, {{P_ACX, 1, 0, 4, 0x0010}, {P_PRG, 1, 0, 5, 0x0020}}, },
 	{ "LDAXM",	0x00cb, 0x00cf, 1, 2, {{P_ACX, 1, 0, 4, 0x0010}, {P_PRG, 1, 0, 5, 0x0020}}, },
 	{ "LDAXNM",	0x00cf, 0x00cf, 1, 2, {{P_ACX, 1, 0, 4, 0x0010}, {P_PRG, 1, 0, 5, 0x0020}}, },
-	{ "LD",		0x00c0, 0x00cc, 1, 3, {{P_ACXHL0, 1, 0, 5, 0x0020}, {P_ACXHL1, 1, 0, 3, 0x0010}, {P_PRG, 1, 0, 0, 0x0003}}, },
-	{ "LDN",	0x00c4, 0x00cc, 1, 3, {{P_ACXHL0, 1, 0, 5, 0x0020}, {P_ACXHL1, 1, 0, 3, 0x0010}, {P_PRG, 1, 0, 0, 0x0003}}, },
-	{ "LDM",	0x00c8, 0x00cc, 1, 3, {{P_ACXHL0, 1, 0, 5, 0x0020}, {P_ACXHL1, 1, 0, 3, 0x0010}, {P_PRG, 1, 0, 0, 0x0003}}, },
-	{ "LDNM",	0x00cc, 0x00cc, 1, 3, {{P_ACXHL0, 1, 0, 5, 0x0020}, {P_ACXHL1, 1, 0, 3, 0x0010}, {P_PRG, 1, 0, 0, 0x0003}}, },
+	{ "LD",		0x00c0, 0x00cc, 1, 3, {{P_ACXHL0, 1, 0, 4, 0x0020}, {P_ACXHL1, 1, 0, 3, 0x0010}, {P_PRG, 1, 0, 0, 0x0003}}, },
+	{ "LDN",	0x00c4, 0x00cc, 1, 3, {{P_ACXHL0, 1, 0, 4, 0x0020}, {P_ACXHL1, 1, 0, 3, 0x0010}, {P_PRG, 1, 0, 0, 0x0003}}, },
+	{ "LDM",	0x00c8, 0x00cc, 1, 3, {{P_ACXHL0, 1, 0, 4, 0x0020}, {P_ACXHL1, 1, 0, 3, 0x0010}, {P_PRG, 1, 0, 0, 0x0003}}, },
+	{ "LDNM",	0x00cc, 0x00cc, 1, 3, {{P_ACXHL0, 1, 0, 4, 0x0020}, {P_ACXHL1, 1, 0, 3, 0x0010}, {P_PRG, 1, 0, 0, 0x0003}}, },
 	{ "MV",		0x0010, 0x00f0, 1, 2, {{P_REG18, 1, 0, 2, 0x000c}, {P_ACCLM, 1, 0, 0, 0x0003}}, },
 	{ "DR",		0x0004, 0x00fc, 1, 1, {{P_REG, 1, 0, 0, 0x0003}}, },
 	{ "IR",		0x0008, 0x00fc, 1, 1, {{P_REG, 1, 0, 0, 0x0003}}, },
