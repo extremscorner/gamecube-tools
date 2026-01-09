@@ -544,10 +544,12 @@ void* CTextureFile::SquishCompress(CImage *pImage,int nFlags)
 
 void* CTextureFile::DXTCompress(CImage *pImage,int nCompType)
 {
+	bool aType;
 	int nXSize,nYSize;
 	BYTE *bits;
 	void *pBuf = NULL;
 
+	aType = pImage->IsTransparent();
 	nXSize = pImage->GetXSize();
 	nYSize = pImage->GetYSize();
 	if((nXSize%4)!=0 || (nYSize%4)!=0) return NULL;
@@ -556,7 +558,7 @@ void* CTextureFile::DXTCompress(CImage *pImage,int nCompType)
 		case CMPR_TYPE_TCX:
 			bits = pImage->GetPixelRGBA();
 			pBuf = (void*)new unsigned short[(nXSize*nYSize)>>2];
-			tx_compress_dxtn(4,nXSize,nYSize,(unsigned char*)bits,GL_COMPRESSED_RGB_S3TC_DXT1_EXT,(GLubyte*)pBuf);
+			tx_compress_dxtn(4,nXSize,nYSize,(unsigned char*)bits,(aType==true)?GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:GL_COMPRESSED_RGB_S3TC_DXT1_EXT,(GLubyte*)pBuf);
 			delete [] bits;
 			break;
 		case CMPR_TYPE_SQUISH:

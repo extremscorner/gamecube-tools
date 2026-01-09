@@ -24,7 +24,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
 #include "dxtn.h"
 
 typedef GLubyte GLchan;
@@ -77,8 +76,8 @@ static void fancybasecolorsearch( GLubyte *blkaddr, GLubyte srccolors[4][4][4], 
    for (i = 0; i < 3; i ++) {
       cv[0][i] = testcolor[0][i];
       cv[1][i] = testcolor[1][i];
-      cv[2][i] = (testcolor[0][i] * 2 + testcolor[1][i]) / 3;
-      cv[3][i] = (testcolor[0][i] + testcolor[1][i] * 2) / 3;
+      cv[2][i] = (testcolor[0][i] * 5 + testcolor[1][i] * 3) >> 3;
+      cv[3][i] = (testcolor[0][i] * 3 + testcolor[1][i] * 5) >> 3;
    }
 
    blockerrlin[0][0] = 0;
@@ -210,7 +209,7 @@ static void fancybasecolorsearch( GLubyte *blkaddr, GLubyte srccolors[4][4][4], 
    }
 
    if (((testcolor[0][0] & 0xf8) << 8 | (testcolor[0][1] & 0xfc) << 3 | testcolor[0][2] >> 3) <
-      ((testcolor[1][0] & 0xf8) << 8 | (testcolor[1][1] & 0xfc) << 3 | testcolor[1][2]) >> 3) {
+      ((testcolor[1][0] & 0xf8) << 8 | (testcolor[1][1] & 0xfc) << 3 | testcolor[1][2] >> 3)) {
       for (i = 0; i < 3; i++) {
          bestcolor[0][i] = testcolor[0][i];
          bestcolor[1][i] = testcolor[1][i];
@@ -261,8 +260,8 @@ static void storedxtencodedblock( GLubyte *blkaddr, GLubyte srccolors[4][4][4], 
    for (i = 0; i < 3; i ++) {
       cv[0][i] = bestcolor[0][i];
       cv[1][i] = bestcolor[1][i];
-      cv[2][i] = (bestcolor[0][i] * 2 + bestcolor[1][i]) / 3;
-      cv[3][i] = (bestcolor[0][i] + bestcolor[1][i] * 2) / 3;
+      cv[2][i] = (bestcolor[0][i] * 5 + bestcolor[1][i] * 3) >> 3;
+      cv[3][i] = (bestcolor[0][i] * 3 + bestcolor[1][i] * 5) >> 3;
    }
 
    testerror = 0;
@@ -371,7 +370,7 @@ static void encodedxtcolorblockfaster( GLubyte *blkaddr, GLubyte srccolors[4][4]
    for (j = 0; j < numypixels; j++) {
       for (i = 0; i < numxpixels; i++) {
          /* don't use this as a base color if the pixel will get black/transparent anyway */
-         if ((type != GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) || (srccolors[j][i][3] <= ALPHACUT)) {
+         if ((type != GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) || (srccolors[j][i][3] > ALPHACUT)) {
             testcv = srccolors[j][i][0] * srccolors[j][i][0] * REDWEIGHT +
                      srccolors[j][i][1] * srccolors[j][i][1] * GREENWEIGHT +
                      srccolors[j][i][2] * srccolors[j][i][2] * BLUEWEIGHT;
